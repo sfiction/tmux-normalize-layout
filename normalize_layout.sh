@@ -13,8 +13,7 @@ main() {
     border=$(get pane-border-status)
 
     strategy=${1:-$(get @normalize_layout-strategy)}
-    ${strategy:=fit}
-    layout=$(python3 "$ROOT/normalize_layout.py" --strategy "$strategy" --border "$border" "$old_layout")
+    layout=$(python3 "$ROOT/normalize_layout.py" --strategy "${strategy:=fit}" --border "$border" "$old_layout")
     if [[ -n $layout ]]; then
         tmux select-layout "$layout"
         tmux display-message -d $SUCCESS_DELAY 'layout normalized'
@@ -24,4 +23,4 @@ main() {
     fi
 }
 
-main
+main "$@"
