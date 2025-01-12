@@ -89,7 +89,7 @@ class Pane:
 
     ADJUST_STRATEGIES = {
         'equal': lambda a: [1] * len(a),
-        'uniform': lambda a: None,
+        'grid': lambda a: None,
         'fit': fit,
     }
     def adjust(self, strategy: str='equal'):
@@ -199,7 +199,8 @@ def calc_checksum(s):
     return csum
 
 def main(layout, adjust, border):
-    assert border in ['off', 'top'], 'Unexpeted border'
+    assert border in ['off', 'top'], 'Unexpected border'
+    assert adjust in Pane.ADJUST_STRATEGIES, 'Unexpected strategy'
 
     pane = parse_layout(layout, border)
     width, height = pane.width, pane.height
