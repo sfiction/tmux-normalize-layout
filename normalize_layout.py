@@ -61,15 +61,23 @@ class Pane:
     id: int = -1
     horizontal: bool = True
     subs: list = field(default_factory=list)
+    size: int = 0
 
     # 为了正确处理 lcm，在窗格的变换过程中宽高包含了周围半个分割线，等到 format 时再减去。
+    ADJUST_STRATEGIES = {
+        'equal': lambda a, _: [1] * len(a),
+        'grid': lambda a, _: None,
+        'fit': lambda a, _: fit(a),
+        'area': lambda _, s: s,
+    }
     def _adjust(self, f):
         if self.id != -1:
             self.width, self.height = 2, 2
             return
 
         splits = [sub.width if self.horizontal else sub.height for sub in self.subs]
-        ratios = f(splits)
+        sizes = [sub.size for sub in self.subs]
+        ratios = f(splits, sizes)
         for sub in self.subs:
             sub._adjust(f)
         widths = [sub.width for sub in self.subs]
@@ -87,11 +95,6 @@ class Pane:
             self.width = lcm(*list(widths))
             self.height = sum(heights)
 
-    ADJUST_STRATEGIES = {
-        'equal': lambda a: [1] * len(a),
-        'grid': lambda a: None,
-        'fit': fit,
-    }
     def adjust(self, strategy: str='equal'):
         self._adjust(Pane.ADJUST_STRATEGIES[strategy])
 
@@ -171,6 +174,7 @@ def parse_layout(s, border):
         pane = Pane(width, height)
         if nex(','):
             pane.id = number()
+            pane.size = 1
         elif nex('{'):
             pane.horizontal = True
             while True:
@@ -185,6 +189,7 @@ def parse_layout(s, border):
             eat(']')
         else:
             assert False, f'Unexpected character {s[i]} at {i}'
+        pane.size += sum(sub.size for sub in pane.subs)
         return pane
 
     assert all(ishex(s[i]) for i in range(4))
