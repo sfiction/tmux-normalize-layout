@@ -203,14 +203,14 @@ def calc_checksum(s):
         csum = (csum >> 1) + ((csum & 1) << 15) + ord(c) & 0xffff
     return csum
 
-def main(layout, adjust, border):
+def main(layout, strategy, border):
     assert border in ['off', 'top'], 'Unexpected border'
-    assert adjust in Pane.ADJUST_STRATEGIES, 'Unexpected strategy'
+    assert strategy in Pane.ADJUST_STRATEGIES, 'Unexpected strategy'
 
     pane = parse_layout(layout, border)
     width, height = pane.width, pane.height
 
-    pane.adjust(adjust)
+    pane.adjust(strategy)
     layout = pane.format(width, height, border)
     csum = calc_checksum(layout)
     full_layout = f'{csum:04x},{layout}'
@@ -220,7 +220,7 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('layout', type=str)
-    parser.add_argument('--adjust', type=str, default='equal')
+    parser.add_argument('--strategy', type=str, default='equal')
     parser.add_argument('--border', type=str, default='off')
 
     args = parser.parse_args()
